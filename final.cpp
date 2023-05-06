@@ -775,4 +775,3 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 
 		}
 }
-
