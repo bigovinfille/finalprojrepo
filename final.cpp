@@ -767,6 +767,9 @@ void SwapArmor(Inv* inv1, Inv* inv2, const Armor& armor) {
 }
 
 void roomInteractionMenu(Room* currentRoom, Player* player) {
+	//space for style
+	cout << endl;
+
 	//interaction menu loop
 	while(true) {
 		cout << "Room Interaction Menu:" << endl;
@@ -778,6 +781,9 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 		int choice;
 		cin >> choice;
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+		//space for style
+		cout << endl;
 
 		//Loot enemies sub-menu
 		if (choice == 1) {
@@ -807,6 +813,10 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 					int enemyChoice;
 					cin >> enemyChoice;
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					
+					//space for style
+					cout << endl;
+
 					if (enemyChoice == 1) {
 						continue;	
 					}else if (enemyChoice == 2) {
@@ -854,6 +864,9 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 			int roomChoice;
 			cin >> roomChoice;
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			
+			//space for style
+			cout << endl;
 			if (roomChoice == 1) {
 				continue;
 			} else if (roomChoice == 2) {
@@ -865,7 +878,9 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 					int weapIndex;
 					cin >> weapIndex;
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
-					
+					//space for style
+					cout << endl;
+
 					if (weapIndex >= 1 && weapIndex <= currentRoom->numWeapons) {
 						int codeWeapIndex = weapIndex - 1;
 						cout << "1. Exit menu" << endl;
@@ -897,7 +912,9 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 					int armIndex;
 					cin >> armIndex;
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
-					
+					//space for style
+					cout << endl;
+
 					if (armIndex >= 1 && armIndex <= currentRoom->numArmors) {
 						int codeArmIndex = armIndex - 1;
 						cout << "1. Exit menu" << endl;
@@ -939,7 +956,9 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 					int objIndex;
 					cin >> objIndex;
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
-					
+					//space for style
+					cout << endl;
+
 					if (objIndex >= 1 && objIndex <= currentRoom->numObjs) {
 						int codeObjIndex = objIndex - 1;
 						cout << "1. Exit menu" << endl;
