@@ -16,6 +16,7 @@ void ProgramGreeting();
 struct InteractableNoun {
 	string name; 
 	string description;
+	string description2;
 	bool flag;
 	//default constructor
 	InteractableNoun() {
@@ -25,9 +26,10 @@ struct InteractableNoun {
 	}
 
 	//parameterized constructor
-	InteractableNoun(const string& objName, const string& desc, bool flag) {
+	InteractableNoun(const string& objName, const string& desc, const string& descActive, bool flag) {
 		name = objName;
 		description = desc;
+		description2 = descActive;
 		flag = flag;
 	}
 };
@@ -40,8 +42,8 @@ struct KeyItem {
 		name = "";
 		description = "";
 	}
-	KeyItem(const string& objName, const string& desc) {
-		name = objName;
+	KeyItem(const string& kName, const string& desc) {
+		name = kName;
 		description = desc;
 	}
 };
@@ -55,13 +57,13 @@ struct Armor {
 		defense = 0;
 		description = "";
 	}
-	Armor(const string& name, const int df, const string& desc){
-		name = name;
+	Armor(const string& aName, const int df, const string& desc){
+		name = aName;
 		defense = df;
 		description = desc;
 	}
 
-}
+};
 
 struct Weapon {
 	string name;
@@ -72,44 +74,55 @@ struct Weapon {
 		damage = 0;
 		description = "";
 	}
-	Weapon(const string& name, const int dmg, const string& desc){
-		name = name;
+	Weapon(const string& wName, const int dmg, const string& desc){
+		name = wName;
 		damage = dmg;
 		description = desc;
 	}
-}
+};
 
-struct Inventory {
+struct Inv {
 	Weapon* weapon;
 	Armor* armor;
 	KeyItem* keys;
 	int numKeys;
-	Inventory() {
+	Inv() {
 		weapon = nullptr;
 		armor = nullptr;
 		keys = nullptr;
 		numKeys = 0;
 	} 
-}
+};
 
 struct Player {
+	string name;
 	int health;
-	Inventory* inv;
-}
+	Inv* inv;
+	Player() {
+		name = "";
+		health = 0;
+		inv = nullptr;
+	}
+	Player(const string& pName, int hp) {
+		name = pName;
+		health = hp;
+		inv = nullptr;
+	}
+};
 
 struct Enemy {
 	string name; 
 	int health;
 	string description;
-	Inventory* inv;
+	Inv* inv;
 	Enemy() {
 		name = "";
 		description = "";
 		health = 0;
 		inv = nullptr;
 	}
-	Enemy(const string& objName, const string& desc, int hp) {
-		name = objName;
+	Enemy(const string& eName, const string& desc, int hp) {
+		name = eName;
 		description = desc;
 		health = hp;
 		inv = nullptr;
@@ -199,14 +212,17 @@ void SwapArmor(Inv*, Room*, const Armor&);
 void SwapWeapon(Inv*, Inv*, const Weapon&);
 void SwapArmor(Inv*, Inv*, const Armor&);
 
+//room interaction menu
+void roomInteractionMenu(Room*, Player*);
+
 int main() {
 	
 	//greeting and getting users name
 	ProgramGreeting();
-	string name = getname();
+	string pName = getname();
 	
 	//story
-	story(name);
+	story(pName);
 
 
 	//making rooms
@@ -248,29 +264,36 @@ int main() {
 	roomConnect(RoomThirteen, RoomFifteen, 'n', false);
 	roomConnect(RoomFifteen, RoomSixteen, 'n', false);
 
-	//add interactable objects to rooms
-
-	//add key items to rooms
-
 	//make weapons
-	
+
 	//make armors
 		
 	//add weapons to rooms
 	
 	//add armors to rooms
 	
+	//make player
+	Player player(pName, 100);
+
+	//make enemies
+	
+	//make player inventory
+	
+	//make enemies inventories
+	
+	//assign inventories to enemies and player
+	
 	//add key items to inventories
 		
 	//add weapons to inventories
 	
 	//add armors to inventories
-	
-	//make enemies
-	
-	//assign inventories to enemies
-	
+
 	//add enemies to rooms
+
+	//add interactable objects to rooms
+
+	//add key items to rooms
 
 	//initialize position on map
 	Room* currentRoom = RoomOne;
@@ -284,10 +307,6 @@ int main() {
 		//output current room name, description if not visited, else output name
 		if (currentRoom->visited != true) {
 			cout << endl << currentRoom->name << ": " << endl << currentRoom->description << endl << endl;
-			//output objs desc in room, if any
-			for (int i = 0; i < currentRoom->numObjs; i++) {
-			cout << currentRoom->objs[i].description << endl << endl;
-			}
 			//set visited false
 			currentRoom->visited = true;
 		} else {
@@ -297,12 +316,10 @@ int main() {
 		//available rooms
 		displayRoomInfo(currentRoom); 
 		
-
-		//add interaction with objs after navigation works
-		
 		//directional input exit codes, game exit codes, look code
 		cout << "Enter direction (n, s, e, w) to go towards," << endl;
 		cout << "or (l) to look around," << endl;
+		cout << "or (i) to interact with surroundings," << endl;
 	        cout << "or type (x) to quit: ";
 		cin >> input;
 		// clear rest of the input buffer, this cin.ignore works best
@@ -323,6 +340,11 @@ int main() {
 			cout << currentRoom->objs[i].description << endl;
 			}
 			continue;
+		}
+
+		//interaction menu
+		if (input == 'i') {
+			roomInteractionMenu(currentRoom, &player);
 		}
 
 		//direction logic+input validation with available/unlocked rooms
@@ -648,9 +670,9 @@ void TakeKey(Inv* invAdd, Room* roomRemove, const KeyItem& key) {
 
 		//remove key from room
 		KeyItem* newKeys = new KeyItem[(roomRemove->numKeys) - 1];
-		for (int i = 0; j = 0; i < roomRemove->numKeys; i++) {
+		for (int i = 0; i < roomRemove->numKeys; i++) {
 			if (i != keyIndex) {
-				newKeys[j++] = roomRemove->keys[i];
+				newKeys[i] = roomRemove->keys[i];
 			}
 		}
 		delete[] roomRemove->keys;
@@ -676,9 +698,9 @@ void TakeKey(Inv* invAdd, Inv* invRemove, const KeyItem& key) {
 
 		//remove key from room
 		KeyItem* newKeys = new KeyItem[(invRemove->numKeys) - 1];
-		for (int i = 0; j = 0; i < invRemove->numKeys; i++) {
+		for (int i = 0; i < invRemove->numKeys; i++) {
 			if (i != keyIndex) {
-				newKeys[j++] = invRemove->keys[i];
+				newKeys[i] = invRemove->keys[i];
 			}
 		}
 		delete[] invRemove->keys;
@@ -715,7 +737,7 @@ void SwapArmor(Inv* inv, Room* room, const Armor& armor) {
 		}
 	}
 	//swap
-	if (weaponIndex != -1) {
+	if (armorIndex != -1) {
 		Armor temp = *inv->armor;
 		*inv->armor = room->armors[armorIndex];
 		room->armors[armorIndex] = temp;
@@ -760,18 +782,200 @@ void roomInteractionMenu(Room* currentRoom, Player* player) {
 		//Loot enemies sub-menu
 		if (choice == 1) {
 			if(currentRoom->numEnemies > 0) {
-			cout << "Choose an enemy to interact with (1-" << currentRoom->numEnemies << "): ";
-			int enemyIndex;
-			cin >> enemyIndex;
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			
-			if (enemyIndex >= 1 && enemyIndex <= currentRoom->numEnemies) {
-				int codeIndex = enemyIndex - 1;
-				cout << "1. Swap weapon with enemy" << endl;
-				cout << "2. Swap armor with enemy" << endl;
 				
-			}
-	
+				for (int i = 0; i< currentRoom->numEnemies; i++) {
+					cout << (i+1) << ": " << currentRoom->enemies[i].name << endl;
+				}
+				cout << "Choose an enemy to interact with (1-" << currentRoom->numEnemies << "): ";
+				int enemyIndex;
+				cin >> enemyIndex;
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			
+				if (enemyIndex >= 1 && enemyIndex <= currentRoom->numEnemies) {
+					int codeIndex = enemyIndex - 1;
+					// calculates difference between stats
+					cout << "1. Exit menu" << endl;
+					cout << "2. Swap weapon with enemy, for +(" << (currentRoom->enemies[codeIndex].inv->weapon->damage) - (player->inv->weapon->damage) <<") damage" << endl;
+					cout << "3. Swap armor with enemy, for +(" << (currentRoom->enemies[codeIndex].inv->armor->defense) - (player->inv->weapon->damage) <<") defense" << endl;
+					if (currentRoom->enemies[codeIndex].inv->numKeys > 0) {
 
+						cout << "4. Take key(s) from enemy" << endl;
+						cout << "Choose an option(1-4): ";
+					}else {
+						cout << "Choose an option(1-3): ";
+						}
+					int enemyChoice;
+					cin >> enemyChoice;
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					if (enemyChoice == 1) {
+						continue;	
+					}else if (enemyChoice == 2) {
+						SwapWeapon(player->inv, currentRoom->enemies[codeIndex].inv, *currentRoom->enemies[codeIndex].inv->weapon);
+						cout << "Weapon has been swapped." << endl;
+					} else if (enemyChoice == 3) {
+						SwapArmor(player->inv, currentRoom->enemies[codeIndex].inv, *currentRoom->enemies[codeIndex].inv->armor);
+						cout << "Armor has been swapped." << endl;
+					} else if (enemyChoice == 4) {
+						if(currentRoom->enemies[codeIndex].inv->numKeys > 0) {
+							TakeKey(player->inv, currentRoom->enemies[codeIndex].inv, currentRoom->enemies[codeIndex].inv->keys[0]);
+							cout << "Key taken from enemy." << endl;
+						} else {
+							cout << "Enemy has no keys." << endl;
+						}	
+					} else {
+						cout << "Invalid option..." << endl;
+					}
+				} else {
+					cout << "Invalid enemy number, try again." << endl;
+				}
+			} else {
+				cout << "No enemies in the room." << endl;
+			}
+		// loot room sub-menu
+		} else if (choice == 2) {
+			cout << "Room Interaction" << endl;
+			cout << "1. Exit menu" << endl;
+			if (currentRoom->numWeapons > 0) {
+				cout << "2. View available weapons (" << currentRoom->numWeapons << ")" <<  endl;
+			} else {
+				cout << "2. No weapaons in this room." << endl;
+			}
+			if (currentRoom->numArmors > 0) {
+				cout << "3. View available armor (" << currentRoom->numArmors << ")" << endl;
+			} else {
+				cout << "3. No armor in this room." << endl;
+			}
+			if (currentRoom->numKeys > 0) {
+				cout << "4. Take" << currentRoom->keys[0].name  << endl;
+			} else{
+				cout << "4. No key available" << endl;
+			}
+			cout << "Choose an option( 1-4): " << endl;
+			int roomChoice;
+			cin >> roomChoice;
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			if (roomChoice == 1) {
+				continue;
+			} else if (roomChoice == 2) {
+				if (currentRoom->numWeapons > 0) {
+					for (int i = 0; i < currentRoom-> numWeapons; i++) {
+						cout << (i+1) << ". " << currentRoom->weapons[i].name << endl;
+					}
+					cout << "Choose an option (1-" << currentRoom->numWeapons << "): ";
+					int weapIndex;
+					cin >> weapIndex;
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					
+					if (weapIndex >= 1 && weapIndex <= currentRoom->numWeapons) {
+						int codeWeapIndex = weapIndex - 1;
+						cout << "1. Exit menu" << endl;
+						cout << "2. Swap weapon with " << currentRoom->weapons[codeWeapIndex].name << " for +(" << (currentRoom->weapons[codeWeapIndex].damage) - (player->inv->weapon->damage) <<") damage" << endl;
+						cout << "Choose an option (1-2): ";
+						int weapChoice;
+						cin >> weapChoice;
+						if (weapChoice == 1) {
+							continue;
+						} else if (weapChoice == 2) {
+							SwapWeapon(player->inv, currentRoom, currentRoom->weapons[codeWeapIndex]);
+							cout << "Weapon swapped with room." << endl;
+						} else {
+							cout << "Invalid option..." << endl;
+						}
+					} else {
+						cout << "Invalid choice" << endl;
+					}
+
+				} else {
+					cout << "There are no weapons in the room..." << endl;
+				}
+			} else if (roomChoice == 3) {
+				if (currentRoom->numArmors > 0) {
+					for (int i = 0; i < currentRoom-> numArmors; i++) {
+						cout << (i+1) << ". " << currentRoom->armors[i].name << endl;
+					}
+					cout << "Choose an option (1-" << currentRoom->numArmors << "): ";
+					int armIndex;
+					cin >> armIndex;
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					
+					if (armIndex >= 1 && armIndex <= currentRoom->numArmors) {
+						int codeArmIndex = armIndex - 1;
+						cout << "1. Exit menu" << endl;
+						cout << "2. Swap armor with " << currentRoom->armors[codeArmIndex].name << " for +(" << (currentRoom->armors[codeArmIndex].defense) - (player->inv->armor->defense) <<") defense" << endl;
+						cout << "Choose an option (1-2): ";
+						int armChoice;
+						cin >> armChoice;
+						if (armChoice == 1) {
+							continue;
+						} else if (armChoice == 2) {
+							SwapArmor(player->inv, currentRoom, currentRoom->armors[codeArmIndex]);
+							cout << "Armor swapped with room." << endl;
+						} else {
+							cout << "Invalid option..." << endl;
+						}
+					} else {
+						cout << "Invalid choice" << endl;
+					}
+
+				} else {
+					cout << "There is no armor in the room..." << endl;
+				}
+
+			} else if (roomChoice == 4) {
+				if (currentRoom->numKeys > 0) {
+					TakeKey(player->inv, currentRoom, currentRoom->keys[0]);
+					cout << "Key taken from room" << endl;
+				} else {
+					cout << "There are no keys in the room..." << endl;
+				}
+			}
+
+		} else if (choice == 3) {
+			if (currentRoom->numObjs > 0) {
+				for (int i = 0; i < currentRoom->numObjs; i++) {
+						cout << (i+1) << ". " << currentRoom->objs[i].name <<  ": " << currentRoom->objs[i].description << endl;
+				}
+				cout << "Choose an option (1-" << currentRoom->numObjs << "): ";
+					int objIndex;
+					cin >> objIndex;
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					
+					if (objIndex >= 1 && objIndex <= currentRoom->numObjs) {
+						int codeObjIndex = objIndex - 1;
+						cout << "1. Exit menu" << endl;
+						cout << "2. Activate object " << endl;
+						cout << "Choose an option (1-2): ";
+						int armChoice;
+						cin >> armChoice;
+						if (armChoice == 1) {
+							continue;
+						} else if (armChoice == 2) {
+							if (currentRoom->objs[codeObjIndex].flag == false) {
+								//activate flags
+								currentRoom->objs[codeObjIndex].flag =true;
+							} else {
+								currentRoom->objs[codeObjIndex].flag = false;
+							}
+							//swap descs
+							InteractableNoun temp = currentRoom->objs[codeObjIndex];
+							currentRoom->objs[codeObjIndex].description = currentRoom->objs[codeObjIndex].description2;
+							currentRoom->objs[codeObjIndex].description2 = temp.description;
+							
+							//output alternate desc
+							cout << currentRoom->objs[codeObjIndex].description << endl;
+						}
+					}
+			} else {
+				cout << "No interactables in this room." << endl;
+			}
+
+		} else if (choice == 4) {
+			break; //breaks while loop, exits menu
+		} else {
+			cout << "Invalid choice, try again." << endl;
 		}
+		cout << endl;
+	}
+
+
 }
